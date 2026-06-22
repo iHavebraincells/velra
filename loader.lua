@@ -2,276 +2,160 @@
 local VALID_USERNAME = "admin"
 local VALID_PASSWORD = "password123"
 
--- ScreenGui
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "PSM"
-screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
-screenGui.ResetOnSpawn = false
-screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+local Players = game:GetService("Players")
+local UIS = game:GetService("UserInputService")
 
--- Main Frame - Exact size and position
-local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 340, 0, 380)
-frame.Position = UDim2.new(0.5, -170, 0.5, -190)
-frame.BackgroundColor3 = Color3.fromRGB(18, 18, 22)
-frame.BackgroundTransparency = 0
-frame.BorderSizePixel = 0
-frame.ClipsDescendants = true
-frame.Parent = screenGui
+local player = Players.LocalPlayer
 
--- Main Corner
-local mainCorner = Instance.new("UICorner")
-mainCorner.CornerRadius = UDim.new(0, 12)
-mainCorner.Parent = frame
+local gui = Instance.new("ScreenGui")
+gui.Name = "Potassium"
+gui.ResetOnSpawn = false
+gui.Parent = player.PlayerGui
 
--- Drop Shadow
-local shadow = Instance.new("Frame")
-shadow.Size = UDim2.new(1, 8, 1, 8)
-shadow.Position = UDim2.new(0, -4, 0, -4)
-shadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-shadow.BackgroundTransparency = 0.6
-shadow.BorderSizePixel = 0
-shadow.Parent = frame
+-- Background
+local bg = Instance.new("Frame")
+bg.Size = UDim2.fromScale(1,1)
+bg.BackgroundColor3 = Color3.fromRGB(10,10,13)
+bg.BorderSizePixel = 0
+bg.Parent = gui
 
-local shadowCorner = Instance.new("UICorner")
-shadowCorner.CornerRadius = UDim.new(0, 12)
-shadowCorner.Parent = shadow
+-- App name (top left)
+local app = Instance.new("TextLabel")
+app.Text = "Potassium"
+app.Font = Enum.Font.Gotham
+app.TextSize = 16
+app.TextColor3 = Color3.fromRGB(170,170,180)
+app.BackgroundTransparency = 1
+app.Position = UDim2.new(0,18,0,12)
+app.Size = UDim2.new(0,200,0,30)
+app.TextXAlignment = Enum.TextXAlignment.Left
+app.Parent = bg
 
--- Top Bar (Draggable)
-local topBar = Instance.new("Frame")
-topBar.Size = UDim2.new(1, 0, 0, 40)
-topBar.Position = UDim2.new(0, 0, 0, 0)
-topBar.BackgroundTransparency = 1
-topBar.Parent = frame
+-- Window buttons
+local controls = Instance.new("TextLabel")
+controls.Text = "—   □   ✕"
+controls.Font = Enum.Font.Gotham
+controls.TextSize = 14
+controls.TextColor3 = Color3.fromRGB(180,180,190)
+controls.BackgroundTransparency = 1
+controls.Position = UDim2.new(1,-120,0,10)
+controls.Size = UDim2.new(0,100,0,30)
+controls.Parent = bg
 
--- Close Button
-local closeBtn = Instance.new("TextButton")
-closeBtn.Size = UDim2.new(0, 28, 0, 28)
-closeBtn.Position = UDim2.new(1, -36, 0, 6)
-closeBtn.BackgroundTransparency = 1
-closeBtn.Text = "✕"
-closeBtn.TextColor3 = Color3.fromRGB(150, 150, 160)
-closeBtn.TextSize = 14
-closeBtn.Font = Enum.Font.SourceSans
-closeBtn.Parent = topBar
-closeBtn.MouseButton1Click:Connect(function()
-    screenGui:Destroy()
+-- Card
+local card = Instance.new("Frame")
+card.Size = UDim2.new(0,360,0,305)
+card.Position = UDim2.new(.5,-180,.5,-150)
+card.BackgroundColor3 = Color3.fromRGB(15,15,18)
+card.BorderSizePixel = 0
+card.Parent = bg
+
+Instance.new("UICorner",card).CornerRadius = UDim.new(0,14)
+
+local stroke = Instance.new("UIStroke")
+stroke.Color = Color3.fromRGB(38,38,44)
+stroke.Thickness = 1
+stroke.Transparency = .2
+stroke.Parent = card
+
+local function label(text,size,y,color,bold)
+	local t = Instance.new("TextLabel")
+	t.BackgroundTransparency = 1
+	t.Size = UDim2.new(1,0,0,size+10)
+	t.Position = UDim2.new(0,0,0,y)
+	t.Text = text
+	t.Font = bold and Enum.Font.GothamBold or Enum.Font.Gotham
+	t.TextSize = size
+	t.TextColor3 = color
+	t.Parent = card
+	return t
+end
+
+label(
+	"Welcome Back",
+	18,
+	28,
+	Color3.fromRGB(240,240,240),
+	true
+)
+
+label(
+	"Sign in to continue to Potassium",
+	11,
+	72,
+	Color3.fromRGB(150,150,160)
+)
+
+local function createInput(y,placeholder,password)
+
+	local box = Instance.new("TextBox")
+	box.Size = UDim2.new(.86,0,0,36)
+	box.Position = UDim2.new(.07,0,0,y)
+
+	box.PlaceholderText = placeholder
+	box.Text = ""
+
+	box.Font = Enum.Font.Gotham
+	box.TextSize = 13
+
+	box.TextColor3 = Color3.fromRGB(230,230,230)
+	box.PlaceholderColor3 = Color3.fromRGB(120,120,130)
+
+	box.BackgroundColor3 = Color3.fromRGB(17,17,21)
+
+	box.BorderSizePixel = 0
+	box.ClearTextOnFocus = false
+	box.Parent = card
+
+	box.Password = password
+
+	Instance.new("UICorner",box).CornerRadius=UDim.new(0,6)
+
+	local s=Instance.new("UIStroke")
+	s.Color=Color3.fromRGB(45,45,50)
+	s.Parent=box
+
+	box.Focused:Connect(function()
+		s.Color=Color3.fromRGB(90,90,100)
+	end)
+
+	box.FocusLost:Connect(function()
+		s.Color=Color3.fromRGB(45,45,50)
+	end)
+
+	return box
+end
+
+local username=createInput(120,"✉  Username")
+local password=createInput(175,"🔒  Password",true)
+
+local login=Instance.new("TextButton")
+login.Size=UDim2.new(.86,0,0,38)
+login.Position=UDim2.new(.07,0,0,230)
+
+login.Text="→ Login"
+
+login.Font=Enum.Font.GothamMedium
+login.TextSize=15
+
+login.BackgroundColor3=Color3.fromRGB(30,30,34)
+login.TextColor3=Color3.fromRGB(220,220,220)
+
+login.Parent=card
+
+Instance.new("UICorner",login).CornerRadius=UDim.new(0,6)
+
+local ls=Instance.new("UIStroke")
+ls.Color=Color3.fromRGB(50,50,55)
+ls.Parent=login
+
+login.MouseEnter:Connect(function()
+	login.BackgroundColor3=Color3.fromRGB(36,36,42)
 end)
 
--- K Icon
-local iconFrame = Instance.new("Frame")
-iconFrame.Size = UDim2.new(0, 44, 0, 44)
-iconFrame.Position = UDim2.new(0.5, -22, 0, 4)
-iconFrame.BackgroundColor3 = Color3.fromRGB(100, 80, 255)
-iconFrame.BackgroundTransparency = 0
-iconFrame.BorderSizePixel = 0
-iconFrame.Parent = topBar
-
-local iconCorner = Instance.new("UICorner")
-iconCorner.CornerRadius = UDim.new(0, 10)
-iconCorner.Parent = iconFrame
-
-local iconText = Instance.new("TextLabel")
-iconText.Size = UDim2.new(1, 0, 1, 0)
-iconText.Position = UDim2.new(0, 0, 0, 0)
-iconText.BackgroundTransparency = 1
-iconText.Text = "K"
-iconText.TextColor3 = Color3.fromRGB(255, 255, 255)
-iconText.TextSize = 26
-iconText.Font = Enum.Font.SourceSansBold
-iconText.Parent = iconFrame
-
--- Title "Potassium"
-local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, 0, 0, 32)
-title.Position = UDim2.new(0, 0, 0, 54)
-title.BackgroundTransparency = 1
-title.Text = "Potassium"
-title.TextColor3 = Color3.fromRGB(255, 255, 255)
-title.TextSize = 30
-title.Font = Enum.Font.SourceSansBold
-title.Parent = frame
-
--- "Welcome Back" subtitle
-local welcomeText = Instance.new("TextLabel")
-welcomeText.Size = UDim2.new(1, 0, 0, 24)
-welcomeText.Position = UDim2.new(0, 0, 0, 88)
-welcomeText.BackgroundTransparency = 1
-welcomeText.Text = "Welcome Back"
-welcomeText.TextColor3 = Color3.fromRGB(160, 160, 170)
-welcomeText.TextSize = 16
-welcomeText.Font = Enum.Font.SourceSans
-welcomeText.Parent = frame
-
--- "Sign in to continue to Potassium"
-local signInText = Instance.new("TextLabel")
-signInText.Size = UDim2.new(1, 0, 0, 20)
-signInText.Position = UDim2.new(0, 0, 0, 114)
-signInText.BackgroundTransparency = 1
-signInText.Text = "Sign in to continue to Potassium"
-signInText.TextColor3 = Color3.fromRGB(130, 130, 140)
-signInText.TextSize = 12
-signInText.Font = Enum.Font.SourceSans
-signInText.Parent = frame
-
--- "Username" label
-local usernameLabel = Instance.new("TextLabel")
-usernameLabel.Size = UDim2.new(0.8, 0, 0, 18)
-usernameLabel.Position = UDim2.new(0.1, 0, 0, 148)
-usernameLabel.BackgroundTransparency = 1
-usernameLabel.Text = "Username"
-usernameLabel.TextColor3 = Color3.fromRGB(180, 180, 190)
-usernameLabel.TextSize = 12
-usernameLabel.TextXAlignment = Enum.TextXAlignment.Left
-usernameLabel.Font = Enum.Font.SourceSans
-usernameLabel.Parent = frame
-
--- Username Input
-local usernameInput = Instance.new("TextBox")
-usernameInput.Size = UDim2.new(0.8, 0, 0, 38)
-usernameInput.Position = UDim2.new(0.1, 0, 0, 168)
-usernameInput.BackgroundColor3 = Color3.fromRGB(28, 28, 34)
-usernameInput.BackgroundTransparency = 0
-usernameInput.TextColor3 = Color3.fromRGB(230, 230, 240)
-usernameInput.TextSize = 14
-usernameInput.Font = Enum.Font.SourceSans
-usernameInput.Text = ""
-usernameInput.ClearTextOnFocus = false
-usernameInput.Parent = frame
-
-local inputCorner = Instance.new("UICorner")
-inputCorner.CornerRadius = UDim.new(0, 6)
-inputCorner.Parent = usernameInput
-
-local inputBorder = Instance.new("Frame")
-inputBorder.Size = UDim2.new(0.8, 0, 0, 38)
-inputBorder.Position = UDim2.new(0.1, 0, 0, 168)
-inputBorder.BackgroundTransparency = 1
-inputBorder.BorderSizePixel = 1
-inputBorder.BorderColor3 = Color3.fromRGB(45, 45, 55)
-inputBorder.Parent = frame
-
-local borderCorner = Instance.new("UICorner")
-borderCorner.CornerRadius = UDim.new(0, 6)
-borderCorner.Parent = inputBorder
-
--- "Password" label
-local passwordLabel = Instance.new("TextLabel")
-passwordLabel.Size = UDim2.new(0.8, 0, 0, 18)
-passwordLabel.Position = UDim2.new(0.1, 0, 0, 218)
-passwordLabel.BackgroundTransparency = 1
-passwordLabel.Text = "Password"
-passwordLabel.TextColor3 = Color3.fromRGB(180, 180, 190)
-passwordLabel.TextSize = 12
-passwordLabel.TextXAlignment = Enum.TextXAlignment.Left
-passwordLabel.Font = Enum.Font.SourceSans
-passwordLabel.Parent = frame
-
--- Password Input
-local passwordInput = Instance.new("TextBox")
-passwordInput.Size = UDim2.new(0.8, 0, 0, 38)
-passwordInput.Position = UDim2.new(0.1, 0, 0, 238)
-passwordInput.BackgroundColor3 = Color3.fromRGB(28, 28, 34)
-passwordInput.BackgroundTransparency = 0
-passwordInput.TextColor3 = Color3.fromRGB(230, 230, 240)
-passwordInput.TextSize = 14
-passwordInput.Font = Enum.Font.SourceSans
-passwordInput.Text = ""
-passwordInput.ClearTextOnFocus = false
-passwordInput.Password = true
-passwordInput.Parent = frame
-
-local passCorner = Instance.new("UICorner")
-passCorner.CornerRadius = UDim.new(0, 6)
-passCorner.Parent = passwordInput
-
-local passBorder = Instance.new("Frame")
-passBorder.Size = UDim2.new(0.8, 0, 0, 38)
-passBorder.Position = UDim2.new(0.1, 0, 0, 238)
-passBorder.BackgroundTransparency = 1
-passBorder.BorderSizePixel = 1
-passBorder.BorderColor3 = Color3.fromRGB(45, 45, 55)
-passBorder.Parent = frame
-
-local passBorderCorner = Instance.new("UICorner")
-passBorderCorner.CornerRadius = UDim.new(0, 6)
-passBorderCorner.Parent = passBorder
-
--- Login Button
-local loginBtn = Instance.new("TextButton")
-loginBtn.Size = UDim2.new(0.8, 0, 0, 44)
-loginBtn.Position = UDim2.new(0.1, 0, 0, 296)
-loginBtn.BackgroundColor3 = Color3.fromRGB(100, 80, 255)
-loginBtn.BackgroundTransparency = 0
-loginBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-loginBtn.TextSize = 16
-loginBtn.Font = Enum.Font.SourceSansBold
-loginBtn.Text = "Login"
-loginBtn.Parent = frame
-
-local btnCorner = Instance.new("UICorner")
-btnCorner.CornerRadius = UDim.new(0, 8)
-btnCorner.Parent = loginBtn
-
--- Status Label
-local statusLabel = Instance.new("TextLabel")
-statusLabel.Size = UDim2.new(1, 0, 0, 20)
-statusLabel.Position = UDim2.new(0, 0, 0, 348)
-statusLabel.BackgroundTransparency = 1
-statusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
-statusLabel.TextSize = 12
-statusLabel.Font = Enum.Font.SourceSans
-statusLabel.Text = ""
-statusLabel.Parent = frame
-
--- DRAGGING FUNCTIONALITY
-local dragStart, startPos, isDragging
-
-topBar.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        isDragging = true
-        dragStart = input.Position
-        startPos = frame.Position
-    end
-end)
-
-topBar.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        isDragging = false
-    end
-end)
-
-game:GetService("UserInputService").InputChanged:Connect(function(input)
-    if isDragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-        local delta = input.Position - dragStart
-        frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-    end
-end)
-
--- FOCUS EFFECTS
-usernameInput.Focused:Connect(function()
-    inputBorder.BorderColor3 = Color3.fromRGB(100, 80, 255)
-end)
-
-usernameInput.FocusLost:Connect(function()
-    inputBorder.BorderColor3 = Color3.fromRGB(45, 45, 55)
-end)
-
-passwordInput.Focused:Connect(function()
-    passBorder.BorderColor3 = Color3.fromRGB(100, 80, 255)
-end)
-
-passwordInput.FocusLost:Connect(function()
-    passBorder.BorderColor3 = Color3.fromRGB(45, 45, 55)
-end)
-
--- BUTTON HOVER
-loginBtn.MouseEnter:Connect(function()
-    loginBtn.BackgroundColor3 = Color3.fromRGB(120, 100, 255)
-end)
-
-loginBtn.MouseLeave:Connect(function()
-    loginBtn.BackgroundColor3 = Color3.fromRGB(100, 80, 255)
+login.MouseLeave:Connect(function()
+	login.BackgroundColor3=Color3.fromRGB(30,30,34)
+end)r3 = Color3.fromRGB(100, 80, 255)
 end)
 
 -- LOGIN FUNCTION
